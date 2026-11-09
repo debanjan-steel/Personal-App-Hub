@@ -84,10 +84,10 @@ A cross-device personal launchpad and dashboard to seamlessly manage, launch, mo
 - [x] 🟢 **Vercel Cloud Deployment Verified**: Live at [**personal-app-hub-three.vercel.app**](https://personal-app-hub-three.vercel.app/).
 - [x] 🟢 **1-Click Local Openers**: Created [`Open_Dashboard.bat`](Open_Dashboard.bat) and [`Launch_App_Hub.url`](Launch_App_Hub.url) in the project folder.
 - [x] 🟢 **Zero-Cold-Start Architecture**: Static frontend served via Edge CDN + zero-config Python endpoints.
-- [ ] 🟡 **Configure Real URLs**: Replace placeholder URLs in `data/apps.json` with actual deployed URLs for:
-  - *ITR Smart Assistant*
-  - *MF Tracker and Advisor*
-  - *Spam Email Deleter*
+- [x] 🟢 **Configured Live Production URLs**:
+  - *MF Tracker and Advisor* (`https://mf-tracker-and-advisor.vercel.app/`)
+  - *Smart Tax Planner and Filling Assistant* (`https://smart-tax-planner-and-filling-assistant.onrender.com/`)
+  - *Spam Email Deleter* (`https://spam-email-deleter.streamlit.app/`)
 
 ### Phase 8: Future Enhancements & Backlog
 - [ ] ⚪ **Password / PIN Protection (Optional)**: Set a master PIN or visitor mode so sensitive apps require unlock.

@@ -9,3 +9,4 @@ if str(ROOT_DIR) not in sys.path:
 from app.main import app
 
 # Vercel serverless function entrypoint
+

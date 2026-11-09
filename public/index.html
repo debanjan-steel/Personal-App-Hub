@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Personal App Hub | Launchpad</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AppHub">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    /* Custom Scrollbar & Smooth transitions */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 9999px; }
+    .glass {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .glass-light {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    /* Safe area for mobile devices */
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200">
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-xl font-bold">
+        🚀
+      </div>
+      <div>
+        <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+          App Launchpad
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">Live</span>
+        </h1>
+        <p class="text-xs text-slate-400 hidden sm:block">Personal Cloud Hub & Remote Directory</p>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="flex items-center gap-2">
+      <!-- Live Health Refresh -->
+      <button onclick="refreshHealthStatus(true)" title="Check Status of All Apps" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 text-xs font-medium">
+        <svg id="refresh-spinner" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        <span class="hidden md:inline">Ping Health</span>
+      </button>
+
+      <!-- Add New App Button -->
+      <button onclick="openAppModal()" class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-blue-600/25 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <span>Add App</span>
+      </button>
+
+      <!-- Share Hub QR -->
+      <button onclick="openHubQRModal()" title="Share Entire Hub Link / QR" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button onclick="toggleTheme()" title="Toggle Theme" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+        <span id="theme-icon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-12">
+    
+    <!-- Hero / Welcome Banner -->
+    <div class="mb-6 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900/40 via-slate-900 to-indigo-950/40 border border-slate-800/80 shadow-xl">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Your Personal Project Directory</h2>
+          <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+            Access your cloud-hosted tools (ITR Smart Assistant, MF Tracker, Spam Deleter & more) from any phone or laptop. Share one-click links or show QR codes for instant mobile access.
+          </p>
+        </div>
+        <div id="stats-badge" class="flex items-center gap-3 bg-slate-900/80 border border-slate-800 px-3.5 py-2 rounded-xl text-xs text-slate-300 self-stretch sm:self-auto justify-around">
+          <div><span id="stat-total" class="font-bold text-white text-sm">3</span> Apps</div>
+          <div class="w-px h-4 bg-slate-700"></div>
+          <div><span id="stat-online" class="font-bold text-emerald-400 text-sm">--</span> Online</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search & Filters Bar -->
+    <div class="space-y-3 mb-6">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <input 
+            type="text" 
+            id="search-input" 
+            oninput="handleSearch(this.value)"
+            placeholder="Search projects, features, or tags..." 
+            class="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition shadow-sm"
+          >
+        </div>
+      </div>
+
+      <!-- Category Filter Pills (Touch Scrollable on Mobile) -->
+      <div id="category-pills" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs font-medium">
+        <!-- Rendered dynamically -->
+        <button onclick="setCategory('All')" class="category-btn active px-3.5 py-1.5 rounded-full bg-blue-600 text-white font-medium shadow-sm transition">All</button>
+      </div>
+    </div>
+
+    <!-- Apps Grid -->
+    <div id="apps-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <!-- Loading Skeleton -->
+      <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 animate-pulse h-48"></div>
+      <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 animate-pulse h-48"></div>
+      <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 animate-pulse h-48"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden text-center py-16 px-4">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-3xl">
+        🔍
+      </div>
+      <h3 class="text-base font-semibold text-slate-200">No applications found</h3>
+      <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Try clearing your search query or add a new personal project to your launchpad.</p>
+      <button onclick="openAppModal()" class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition">Add New Project</button>
+    </div>
+
+  </main>
+
+  <!-- Mobile Bottom Quick Navigation Bar -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-6 py-2.5 flex items-center justify-around safe-bottom">
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center gap-1 text-slate-300 text-[10px] font-medium">
+      <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+      <span>Dashboard</span>
+    </button>
+    <button onclick="openAppModal()" class="flex flex-col items-center gap-1 text-slate-300 text-[10px] font-medium">
+      <div class="w-8 h-8 -mt-4 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+      </div>
+      <span>Add Project</span>
+    </button>
+    <button onclick="openHubQRModal()" class="flex flex-col items-center gap-1 text-slate-300 text-[10px] font-medium">
+      <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+      <span>Share Hub</span>
+    </button>
+  </nav>
+
+  <!-- App Add / Edit Modal -->
+  <div id="app-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+      <button onclick="closeAppModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+
+      <h3 id="modal-title" class="text-lg font-bold text-white mb-4">Add New Application</h3>
+      
+      <form id="app-form" onsubmit="handleSaveApp(event)" class="space-y-4 text-xs sm:text-sm">
+        <input type="hidden" id="form-app-id">
+
+        <div class="grid grid-cols-4 gap-3">
+          <div class="col-span-1">
+            <label class="block text-xs font-medium text-slate-400 mb-1">Emoji</label>
+            <input type="text" id="form-icon" value="🚀" maxlength="4" class="w-full text-center py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-lg focus:outline-none focus:border-blue-500 text-white">
+          </div>
+          <div class="col-span-3">
+            <label class="block text-xs font-medium text-slate-400 mb-1">App Name *</label>
+            <input type="text" id="form-name" required placeholder="e.g. ITR Smart Assistant" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:border-blue-500 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Hosted Online URL *</label>
+          <input type="url" id="form-url" required placeholder="https://my-app.streamlit.app or https://my-app.onrender.com" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:border-blue-500 text-white">
+          <p class="text-[11px] text-slate-500 mt-1">Direct public URL where this project is deployed.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Category</label>
+            <input type="text" id="form-category" placeholder="Finance, Productivity, AI..." class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:border-blue-500 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Tags (Comma separated)</label>
+            <input type="text" id="form-tags" placeholder="Tax, Portfolio, Automation" class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:border-blue-500 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Description</label>
+          <textarea id="form-desc" rows="2" placeholder="What does this app do?" class="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:border-blue-500 text-white"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="form-pinned" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0">
+          <label for="form-pinned" class="text-xs text-slate-300 font-medium">Pin this app to top of dashboard</label>
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+          <button type="button" id="btn-delete-app" onclick="handleDeleteApp()" class="hidden px-3 py-2 text-rose-400 hover:bg-rose-500/10 rounded-lg text-xs font-medium transition">
+            Delete App
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" onclick="closeAppModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition">Cancel</button>
+            <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-medium shadow-md shadow-blue-600/30 transition">Save Application</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- QR Code & Share Modal -->
+  <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl text-center relative">
+      <button onclick="closeQRModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+
+      <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-600/10 text-blue-400 flex items-center justify-center text-2xl" id="qr-icon-display">
+        📱
+      </div>
+
+      <h3 id="qr-title" class="text-lg font-bold text-white">Share App</h3>
+      <p id="qr-subtitle" class="text-xs text-slate-400 mt-0.5 mb-4">Scan with any phone camera to open</p>
+
+      <!-- QR Code Canvas Container -->
+      <div class="p-4 bg-white rounded-2xl inline-block shadow-inner mx-auto mb-4" id="qrcode-box"></div>
+
+      <!-- URL Preview Box -->
+      <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-2.5 flex items-center justify-between gap-2 mb-4">
+        <span id="qr-url-text" class="text-xs text-slate-300 truncate text-left select-all"></span>
+        <button onclick="copyCurrentQRLink()" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs rounded-lg font-medium transition flex items-center gap-1 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          <span>Copy</span>
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-2">
+        <button id="btn-native-share" onclick="triggerNativeShare()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-blue-600/30 flex items-center justify-center gap-1.5 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+          <span>Share via Android</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 border border-slate-700 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2">
+    <span id="toast-icon">✅</span>
+    <span id="toast-msg">Copied link to clipboard!</span>
+  </div>
+
+  <!-- Application Frontend Logic -->
+  <script>
+    // State
+    let allApps = [];
+    let currentCategory = 'All';
+    let searchQuery = '';
+    let healthMap = {};
+    let activeQRTarget = { title: '', url: '' };
+
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+          navigator.serviceWorker.register('/static/sw.js').catch(err => console.log('SW registration skipped:', err));
+        });
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      loadApps();
+      // Auto-check health in background
+      setTimeout(() => refreshHealthStatus(false), 800);
+    });
+
+    // Theme Management
+    function initTheme() {
+      const savedTheme = localStorage.getItem('apphub_theme') || 'dark';
+      if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('theme-icon').textContent = '☀️';
+      } else {
+        document.documentElement.classList.add('dark');
+        document.getElementById('theme-icon').textContent = '🌙';
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('apphub_theme', isDark ? 'dark' : 'light');
+      document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+    }
+
+    // Load Apps from API
+    async function loadApps() {
+      try {
+        const res = await fetch('/api/apps');
+        if (!res.ok) throw new Error('Failed to fetch apps');
+        allApps = await res.json();
+        renderCategories();
+        filterAndRenderApps();
+        updateStats();
+      } catch (err) {
+        showToast('❌ Failed to load apps: ' + err.message);
+      }
+    }
+
+    // Dynamic Category Pills
+    function renderCategories() {
+      const categories = ['All', ...new Set(allApps.map(a => a.category).filter(Boolean))];
+      const container = document.getElementById('category-pills');
+      container.innerHTML = categories.map(cat => `
+        <button 
+          onclick="setCategory('${cat}')" 
+          class="category-btn px-3.5 py-1.5 rounded-full border transition whitespace-nowrap ${
+            currentCategory === cat 
+              ? 'bg-blue-600 border-blue-500 text-white font-semibold shadow-sm' 
+              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }"
+        >
+          ${cat}
+        </button>
+      `).join('');
+    }
+
+    function setCategory(cat) {
+      currentCategory = cat;
+      renderCategories();
+      filterAndRenderApps();
+    }
+
+    function handleSearch(query) {
+      searchQuery = query.toLowerCase().trim();
+      filterAndRenderApps();
+    }
+
+    // Filter & Render Cards
+    function filterAndRenderApps() {
+      const grid = document.getElementById('apps-grid');
+      const emptyState = document.getElementById('empty-state');
+
+      let filtered = allApps.filter(app => {
+        const matchesCategory = currentCategory === 'All' || app.category.toLowerCase() === currentCategory.toLowerCase();
+        const matchesSearch = !searchQuery || 
+          app.name.toLowerCase().includes(searchQuery) || 
+          app.description.toLowerCase().includes(searchQuery) ||
+          (app.tags && app.tags.some(t => t.toLowerCase().includes(searchQuery)));
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = filtered.map(app => renderAppCard(app)).join('');
+    }
+
+    function renderAppCard(app) {
+      const health = healthMap[app.id];
+      let statusBadge = `
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-800 text-slate-400 border border-slate-700/60">
+          <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Unknown
+        </span>
+      `;
+
+      if (health) {
+        if (health.status === 'online') {
+          statusBadge = `
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" title="${health.response_time_ms}ms response">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Online (${health.response_time_ms}ms)
+            </span>
+          `;
+        } else {
+          statusBadge = `
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20" title="${health.error || 'Unreachable'}">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Offline
+            </span>
+          `;
+        }
+      }
+
+      const tagsHtml = (app.tags || []).map(t => `
+        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 border border-slate-700/50">#${t}</span>
+      `).join('');
+
+      return `
+        <div class="group relative rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 p-5 shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col justify-between">
+          <div>
+            <!-- Header Row -->
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700/70 flex items-center justify-center text-2xl shadow-inner group-hover:scale-105 transition-transform">
+                  ${app.icon || '🚀'}
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-bold text-white text-base leading-snug group-hover:text-blue-400 transition-colors">${app.name}</h3>
+                    ${app.is_pinned ? '<span title="Pinned App" class="text-amber-400 text-xs">⭐</span>' : ''}
+                  </div>
+                  <span class="text-xs text-slate-400 font-medium">${app.category || 'General'}</span>
+                </div>
+              </div>
+
+              <!-- Status -->
+              ${statusBadge}
+            </div>
+
+            <!-- Description -->
+            <p class="text-xs text-slate-300 leading-relaxed line-clamp-2 mb-3">
+              ${app.description || 'No description provided.'}
+            </p>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-1.5 mb-5">
+              ${tagsHtml}
+            </div>
+          </div>
+
+          <!-- Bottom Actions -->
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+            <!-- Launch Button -->
+            <a 
+              href="${app.url}" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20 transition"
+            >
+              <span>Launch</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
+
+            <!-- QR & Share -->
+            <button 
+              onclick="openAppQRModal('${app.id}')" 
+              title="Share or QR Code"
+              class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+            </button>
+
+            <!-- Edit -->
+            <button 
+              onclick="openAppModal('${app.id}')" 
+              title="Edit Settings"
+              class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Health Checks
+    async function refreshHealthStatus(force = true) {
+      const spinner = document.getElementById('refresh-spinner');
+      if (spinner) spinner.classList.add('animate-spin');
+
+      try {
+        const res = await fetch(`/api/health?force=${force}`);
+        if (res.ok) {
+          const results = await res.json();
+          healthMap = {};
+          results.forEach(r => { healthMap[r.app_id] = r; });
+          filterAndRenderApps();
+          updateStats();
+          if (force) showToast('📡 App health statuses updated!');
+        }
+      } catch (err) {
+        console.error('Health check failed', err);
+      } finally {
+        if (spinner) spinner.classList.remove('animate-spin');
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = allApps.length;
+      const onlineCount = Object.values(healthMap).filter(h => h.status === 'online').length;
+      document.getElementById('stat-online').textContent = Object.keys(healthMap).length > 0 ? onlineCount : '--';
+    }
+
+    // QR Code & Sharing Modals
+    function openAppQRModal(appId) {
+      const app = allApps.find(a => a.id === appId);
+      if (!app) return;
+
+      activeQRTarget = {
+        title: app.name,
+        url: app.url,
+        text: `Open ${app.name}`
+      };
+
+      document.getElementById('qr-icon-display').textContent = app.icon || '📱';
+      document.getElementById('qr-title').textContent = app.name;
+      document.getElementById('qr-subtitle').textContent = 'Scan with your Android camera or share link';
+      document.getElementById('qr-url-text').textContent = app.url;
+
+      renderQR(app.url);
+      document.getElementById('qr-modal').classList.remove('hidden');
+    }
+
+    function openHubQRModal() {
+      const currentUrl = window.location.href;
+      activeQRTarget = {
+        title: 'Personal App Hub',
+        url: currentUrl,
+        text: 'Access all personal self-built apps in one place.'
+      };
+
+      document.getElementById('qr-icon-display').textContent = '🚀';
+      document.getElementById('qr-title').textContent = 'Personal App Hub';
+      document.getElementById('qr-subtitle').textContent = 'Scan or share to access your dashboard from any device';
+      document.getElementById('qr-url-text').textContent = currentUrl;
+
+      renderQR(currentUrl);
+      document.getElementById('qr-modal').classList.remove('hidden');
+    }
+
+    function renderQR(text) {
+      const box = document.getElementById('qrcode-box');
+      box.innerHTML = '';
+      new QRCode(box, {
+        text: text,
+        width: 180,
+        height: 180,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function closeQRModal() {
+      document.getElementById('qr-modal').classList.add('hidden');
+    }
+
+    function copyCurrentQRLink() {
+      if (!activeQRTarget.url) return;
+      navigator.clipboard.writeText(activeQRTarget.url).then(() => {
+        showToast('📋 Copied link to clipboard!');
+      }).catch(() => {
+        showToast('⚠️ Unable to auto-copy; please copy manually.');
+      });
+    }
+
+    function triggerNativeShare() {
+      if (navigator.share) {
+        navigator.share({
+          title: activeQRTarget.title,
+          text: activeQRTarget.text,
+          url: activeQRTarget.url
+        }).catch(err => {
+          if (err.name !== 'AbortError') copyCurrentQRLink();
+        });
+      } else {
+        copyCurrentQRLink();
+      }
+    }
+
+    // Modal Add / Edit Handling
+    function openAppModal(appId = null) {
+      const modal = document.getElementById('app-modal');
+      const deleteBtn = document.getElementById('btn-delete-app');
+      const title = document.getElementById('modal-title');
+      
+      document.getElementById('app-form').reset();
+      document.getElementById('form-app-id').value = '';
+
+      if (appId) {
+        const app = allApps.find(a => a.id === appId);
+        if (app) {
+          title.textContent = 'Edit Application';
+          document.getElementById('form-app-id').value = app.id;
+          document.getElementById('form-name').value = app.name;
+          document.getElementById('form-url').value = app.url;
+          document.getElementById('form-icon').value = app.icon || '🚀';
+          document.getElementById('form-category').value = app.category || 'General';
+          document.getElementById('form-tags').value = (app.tags || []).join(', ');
+          document.getElementById('form-desc').value = app.description || '';
+          document.getElementById('form-pinned').checked = !!app.is_pinned;
+          deleteBtn.classList.remove('hidden');
+        }
+      } else {
+        title.textContent = 'Add New Application';
+        deleteBtn.classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeAppModal() {
+      document.getElementById('app-modal').classList.add('hidden');
+    }
+
+    async function handleSaveApp(e) {
+      e.preventDefault();
+      const appId = document.getElementById('form-app-id').value;
+      const payload = {
+        name: document.getElementById('form-name').value.trim(),
+        url: document.getElementById('form-url').value.trim(),
+        icon: document.getElementById('form-icon').value.trim() || '🚀',
+        category: document.getElementById('form-category').value.trim() || 'General',
+        tags: document.getElementById('form-tags').value.split(',').map(s => s.trim()).filter(Boolean),
+        description: document.getElementById('form-desc').value.trim(),
+        is_pinned: document.getElementById('form-pinned').checked
+      };
+
+      try {
+        let res;
+        if (appId) {
+          res = await fetch(`/api/apps/${appId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          res = await fetch('/api/apps', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || 'Save failed');
+        }
+
+        closeAppModal();
+        showToast(appId ? '✅ Application updated!' : '🎉 Application added!');
+        await loadApps();
+        refreshHealthStatus(true);
+      } catch (err) {
+        showToast('❌ Error: ' + err.message);
+      }
+    }
+
+    async function handleDeleteApp() {
+      const appId = document.getElementById('form-app-id').value;
+      if (!appId) return;
+
+      if (!confirm('Are you sure you want to remove this application from the hub?')) return;
+
+      try {
+        const res = await fetch(`/api/apps/${appId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+
+        closeAppModal();
+        showToast('🗑️ App removed successfully');
+        await loadApps();
+      } catch (err) {
+        showToast('❌ Error: ' + err.message);
+      }
+    }
+
+    // Toast helper
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
+

@@ -81,7 +81,8 @@ A cross-device personal launchpad and dashboard to seamlessly manage, launch, mo
 
 ### Phase 7: Real App Configuration & Cloud Deployment
 - [x] 🟢 **GitHub Repository Pushed**: Repository live at [`debanjan-steel/Personal-App-Hub`](https://github.com/debanjan-steel/Personal-App-Hub).
-- [ ] 🟡 **Cloud Hosting Selection (Zero Cold-Start)**: Evaluate Hugging Face Spaces (Always On), Render + UptimeRobot keep-alive, or Vercel.
+- [x] 🟢 **Vercel Deployment Architecture**: Configured serverless entrypoint (`api/index.py`), `vercel.json` rewrite routing, and Edge CDN promotion.
+- [ ] 🟡 **Deploy on Vercel**: Import repository into Vercel Dashboard for instant, zero-cold-start global access.
 - [ ] 🟡 **Configure Real URLs**: Replace placeholder URLs in `data/apps.json` with actual deployed URLs for:
   - *ITR Smart Assistant*
   - *MF Tracker and Advisor*

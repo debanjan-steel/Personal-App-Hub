@@ -45,15 +45,15 @@ You'll see:
 
 Since your apps are hosted online, you can also host this dashboard online so you and your friends can access it anytime from any network without your laptop needing to be on:
 
-### Option 1: Render.com (Recommended & Free)
-1. Push this repository to GitHub.
-2. Go to [Render Dashboard](https://dashboard.render.com) -> **New Web Service**.
-3. Connect your repository.
-4. Render will auto-detect the `Dockerfile` (or set **Build Command**: `pip install -r requirements.txt` and **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port 8000`).
-5. Your dashboard is live at `https://your-hub.onrender.com`!
+### Option 1: Vercel (Recommended — Zero Cold Start & Instant Edge CDN)
+1. Go to [vercel.com/dashboard](https://vercel.com/dashboard) and click **"Add New..."** -> **"Project"**.
+2. Select your repository: `debanjan-steel/Personal-App-Hub`.
+3. Vercel automatically detects the Python configuration and `vercel.json`.
+4. Click **Deploy**.
+5. Your dashboard is live at `https://personal-app-hub.vercel.app` with instant 0ms loads, full PWA Android support, and automatic deployment on every `git push`!
 
-### Option 2: Railway.app / Fly.io / Hugging Face Spaces
-- The included [`Dockerfile`](Dockerfile) runs out-of-the-box on Railway, Fly.io, or Hugging Face Docker spaces with zero configuration.
+### Option 2: Render.com / Docker (Alternative)
+- The included [`Dockerfile`](Dockerfile) can also be deployed to Render, Railway, Fly.io, or Hugging Face Spaces.
 
 ---
 

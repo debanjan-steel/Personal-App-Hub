@@ -1,0 +1,50 @@
+[
+  {
+    "name": "ITR Smart Assistant",
+    "description": "AI-powered Income Tax Return filing assistant, deduction analyzer, and tax regime optimizer.",
+    "category": "Finance",
+    "url": "https://itr-assistant.example.com",
+    "icon": "\ud83d\udcbc",
+    "tags": [
+      "Tax",
+      "AI",
+      "Finance",
+      "ITR"
+    ],
+    "is_pinned": true,
+    "id": "itr-assistant",
+    "created_at": "2026-11-09T15:35:00Z"
+  },
+  {
+    "name": "MF Tracker and Advisor",
+    "description": "Mutual fund portfolio tracker, SIP growth visualizer, asset allocation & rebalancing advisor.",
+    "category": "Finance",
+    "url": "https://mf-tracker.example.com",
+    "icon": "\ud83d\udcc8",
+    "tags": [
+      "Wealth",
+      "Mutual Funds",
+      "Portfolio",
+      "SIP"
+    ],
+    "is_pinned": true,
+    "id": "mf-tracker",
+    "created_at": "2026-11-09T15:35:00Z"
+  },
+  {
+    "name": "Spam Email Deleter",
+    "description": "Smart mailbox decluttering tool to identify junk senders, bulk purge unwanted mail, and auto-unsubscribe.",
+    "category": "Productivity",
+    "url": "https://spam-deleter.example.com",
+    "icon": "\u2709\ufe0f",
+    "tags": [
+      "Email",
+      "Automation",
+      "Productivity",
+      "Cleanup"
+    ],
+    "is_pinned": false,
+    "id": "spam-deleter",
+    "created_at": "2026-11-09T15:35:00Z"
+  }
+]

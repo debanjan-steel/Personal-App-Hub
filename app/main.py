@@ -177,6 +177,8 @@ async def catch_all_debug(request: Request, path_name: str):
         "debug": True,
         "scope_path": request.scope.get("path"),
         "url_path": request.url.path,
-        "path_name": path_name
+        "path_name": path_name,
+        "headers": dict(request.headers),
+        "query": dict(request.query_params)
     }
 

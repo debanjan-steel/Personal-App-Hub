@@ -6,7 +6,7 @@
   <title>Personal App Hub | Launchpad</title>
   
   <!-- PWA Meta Tags -->
-  <link rel="manifest" href="/static/manifest.json">
+  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -300,7 +300,9 @@
     // Register PWA Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/static/sw.js').catch(err => console.log('SW registration skipped:', err));
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+          navigator.serviceWorker.register('/static/sw.js').catch(err => console.log('SW registration skipped:', err));
+        });
       });
     }
 
@@ -330,17 +332,28 @@
       document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
     }
 
-    // Load Apps from API
+    // Load Apps from API with static fallback
     async function loadApps() {
       try {
-        const res = await fetch('/api/apps');
-        if (!res.ok) throw new Error('Failed to fetch apps');
+        let res = await fetch('/api/apps');
+        if (!res.ok) {
+          // Graceful fallback to static CDN
+          res = await fetch('/data/apps.json');
+        }
         allApps = await res.json();
         renderCategories();
         filterAndRenderApps();
         updateStats();
       } catch (err) {
-        showToast('❌ Failed to load apps: ' + err.message);
+        try {
+          const fallbackRes = await fetch('/data/apps.json');
+          allApps = await fallbackRes.json();
+          renderCategories();
+          filterAndRenderApps();
+          updateStats();
+        } catch (e) {
+          showToast('❌ Failed to load apps: ' + err.message);
+        }
       }
     }
 

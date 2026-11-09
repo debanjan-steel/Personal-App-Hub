@@ -80,11 +80,12 @@ A cross-device personal launchpad and dashboard to seamlessly manage, launch, mo
 - [x] 🟢 **Cloud Deployment Ready**: Created `Dockerfile` for Render / Railway / Fly.io / Vercel.
 
 ### Phase 7: Real App Configuration & Cloud Deployment
-- [ ] 🟡 **Configure Real URLs**: Replace placeholder URLs with actual deployed URLs for:
+- [x] 🟢 **GitHub Repository Pushed**: Repository live at [`debanjan-steel/Personal-App-Hub`](https://github.com/debanjan-steel/Personal-App-Hub).
+- [ ] 🟡 **Cloud Hosting Selection (Zero Cold-Start)**: Evaluate Hugging Face Spaces (Always On), Render + UptimeRobot keep-alive, or Vercel.
+- [ ] 🟡 **Configure Real URLs**: Replace placeholder URLs in `data/apps.json` with actual deployed URLs for:
   - *ITR Smart Assistant*
   - *MF Tracker and Advisor*
   - *Spam Email Deleter*
-- [ ] 🟡 **Deploy Dashboard to Cloud (Free Tier)**: Deploy this App Hub to Render / Railway / Hugging Face Spaces for 24/7 global internet access.
 
 ### Phase 8: Future Enhancements & Backlog
 - [ ] ⚪ **Password / PIN Protection (Optional)**: Set a master PIN or visitor mode so sensitive apps require unlock.

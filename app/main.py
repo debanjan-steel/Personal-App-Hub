@@ -1,7 +1,7 @@
 import socket
 from pathlib import Path
 from typing import List, Optional
-from fastapi import FastAPI, APIRouter, HTTPException, Query, status
+from fastapi import FastAPI, APIRouter, HTTPException, Query, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -169,3 +169,14 @@ def serve_dashboard():
         if index_file.exists():
             return FileResponse(index_file, media_type="text/html")
     return {"message": "Universal Personal App Hub API is running."}
+
+
+@app.api_route("/{path_name:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def catch_all_debug(request: Request, path_name: str):
+    return {
+        "debug": True,
+        "scope_path": request.scope.get("path"),
+        "url_path": request.url.path,
+        "path_name": path_name
+    }
+
